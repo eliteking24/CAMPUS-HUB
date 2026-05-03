@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sell Item</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="form-box">
+  <h2>Post Item</h2>
+
+  <input id="owner" placeholder="Your Name">
+  <input id="contact" placeholder="Phone Number">
+  <input id="name" placeholder="Item Name">
+  <input id="price" placeholder="Price">
+  <input id="location" placeholder="Location">
+  <input type="file" id="image">
+
+  <button onclick="postItem()">Post Item</button>
+</div>
+
+<div id="popup" class="popup">✅ Item Posted!</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>

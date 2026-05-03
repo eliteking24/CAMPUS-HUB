@@ -1,0 +1,159 @@
+body {
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  background: #1e293b;
+}
+
+.hero {
+  text-align: center;
+  padding: 40px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  background: #1e293b;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.form-box {
+  max-width: 400px;
+  margin: 50px auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-box input {
+  margin: 10px 0;
+  padding: 10px;
+}
+
+button {
+  padding: 10px;
+  background: #22c55e;
+  border: none;
+  cursor: pointer;
+}
+
+.popup {
+  display: none;
+  text-align: center;
+  background: white;
+  color: black;
+  padding: 20px;
+}
+
+/* BUTTON BASE */
+.btn {
+  padding: 10px 20px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+  margin-left: 10px;
+  display: inline-block;
+}
+
+/* SELL BUTTON */
+.primary {
+  background: linear-gradient(45deg, #22c55e, #4ade80);
+  color: black;
+}
+
+.primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px #22c55e;
+}
+
+/* DASHBOARD BUTTON */
+.secondary {
+  background: linear-gradient(45deg, #3b82f6, #60a5fa);
+  color: white;
+}
+
+.secondary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px #3b82f6;
+}
+
+body {
+  font-family: Arial;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
+}
+
+/* HERO */
+.hero {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.hero h1 {
+  font-size: 40px;
+}
+
+/* SECTIONS */
+.section-title {
+  margin: 20px;
+  text-align: center;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* CARD */
+.card {
+  background: rgba(255,255,255,0.05);
+  padding: 10px;
+  border-radius: 15px;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card img {
+  width: 100%;
+  height: 150px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+/* INFO SECTION */
+.info {
+  text-align: center;
+  padding: 40px;
+  background: rgba(255,255,255,0.05);
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #020617;
+}
