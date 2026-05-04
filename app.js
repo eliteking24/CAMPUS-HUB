@@ -1,160 +1,205 @@
-// =====================
-// LOAD PRODUCTS TO HOME
-// =====================
+// ===============================
+// WAIT FOR PAGE TO LOAD
+// ===============================
+document.addEventListener("DOMContentLoaded", () => {
+  loadProducts();
+});
+
+
+// ===============================
+// LOAD ALL PRODUCTS (HOMEPAGE)
+// ===============================
 async function loadProducts() {
-  const { data, error } = await window.db.from("products").select("*");
+  try {
+    if (!window.db) {
+      console.log("DB not ready");
+      return;
+    }
 
-  if (error) {
-    console.log(error);
-    return;
+    const { data, error } = await window.db
+      .from("products")
+      .select("*");
+
+    if (error) {
+      console.log("Fetch error:", error);
+      return;
+    }
+
+    const container = document.getElementById("products");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (!data || data.length === 0) {
+      container.innerHTML = "<p>No products yet</p>";
+      return;
+    }
+
+    data.forEach(item => {
+      if (!item.listed) return;
+
+      container.innerHTML += `
+        <div class="card">
+          <img src="${item.image || 'https://picsum.photos/200'}" width="100%">
+          <h3>${item.name}</h3>
+          <p>₦${item.price}</p>
+          <small>${item.location || ''}</small>
+        </div>
+      `;
+    });
+
+  } catch (err) {
+    console.log("Load error:", err);
   }
-
-  let container = document.getElementById("products");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  data.forEach(item => {
-    if (!item.listed) return;
-
-    container.innerHTML += `
-      <div class="card">
-        <img src="${item.image}">
-        <h3>${item.name}</h3>
-        <p>₦${item.price}</p>
-        <p>📍 ${item.location}</p>
-        <small>Seller: ${item.owner}</small>
-      </div>
-    `;
-  });
 }
 
-loadProducts();
 
-
-// =====================
+// ===============================
 // POST ITEM
-// =====================
+// ===============================
 async function postItem() {
   try {
-    let owner = document.getElementById("owner").value.trim();
-    let contact = document.getElementById("contact").value.trim();
-    let name = document.getElementById("name").value.trim();
-    let price = document.getElementById("price").value;
-    let location = document.getElementById("location").value.trim();
-    let file = document.getElementById("image").files[0];
+    const owner = document.getElementById("owner")?.value.trim();
+    const contact = document.getElementById("contact")?.value.trim();
+    const name = document.getElementById("name")?.value.trim();
+    const price = document.getElementById("price")?.value;
+    const location = document.getElementById("location")?.value.trim();
+    const file = document.getElementById("image")?.files[0];
 
-    if (!owner || !contact || !name || !price || !file) {
-      alert("Fill all fields!");
+    if (!owner || !contact || !name || !price) {
+      alert("Please fill all fields");
       return;
     }
 
-    let fileName = Date.now() + "-" + file.name;
+    let imageUrl = "";
 
-    // upload image
-    const { error: uploadError } = await window.db.storage
-      .from("products")
-      .upload(fileName, file);
+    // ===============================
+    // UPLOAD IMAGE (OPTIONAL)
+    // ===============================
+    if (file) {
+      const fileName = Date.now() + "-" + file.name;
 
-    if (uploadError) {
-      console.log(uploadError);
-      alert("Image upload failed");
-      return;
+      const { error: uploadError } = await window.db.storage
+        .from("products")
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.log("Upload error:", uploadError);
+        alert("Image upload failed");
+        return;
+      }
+
+      const { data } = window.db.storage
+        .from("products")
+        .getPublicUrl(fileName);
+
+      imageUrl = data.publicUrl;
     }
 
-    // get url
-    const { data: urlData } = window.db.storage
+    // ===============================
+    // INSERT INTO DATABASE
+    // ===============================
+    const { error: insertError } = await window.db
       .from("products")
-      .getPublicUrl(fileName);
-
-    // insert into DB
-    const { error: dbError } = await window.db.from("products").insert([
-      {
+      .insert([{
         owner,
         contact,
         name,
         price,
         location,
-        image: urlData.publicUrl,
+        image: imageUrl,
         listed: true
-      }
-    ]);
+      }]);
 
-    if (dbError) {
-      console.log(dbError);
+    if (insertError) {
+      console.log("Insert error:", insertError);
       alert("Failed to post item");
       return;
     }
 
-    // SUCCESS POPUP
-    document.getElementById("popup").style.display = "block";
+    alert("✅ Item posted successfully!");
 
-    // redirect
-    setTimeout(() => {
-      window.location.href = "index.html";
-    }, 1500);
+    loadProducts();
 
   } catch (err) {
-    console.log(err);
+    console.log("Post error:", err);
+    alert("Something went wrong");
   }
 }
 
 
-// =====================
-// LOAD USER ITEMS
-// =====================
+// ===============================
+// LOAD USER ITEMS (DASHBOARD)
+// ===============================
 async function loadUserItems() {
-  let owner = document.getElementById("ownerName").value.trim();
-  let contact = document.getElementById("userContact").value.trim();
+  try {
+    const owner = document.getElementById("ownerName")?.value.trim();
+    const contact = document.getElementById("userContact")?.value.trim();
 
-  if (!owner || !contact) {
-    alert("Enter name and phone");
-    return;
+    if (!owner || !contact) {
+      alert("Enter your name and phone");
+      return;
+    }
+
+    const { data, error } = await window.db
+      .from("products")
+      .select("*")
+      .eq("owner", owner)
+      .eq("contact", contact);
+
+    if (error) {
+      console.log("Dashboard error:", error);
+      return;
+    }
+
+    const container = document.getElementById("userProducts");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (!data || data.length === 0) {
+      container.innerHTML = "<p>No items found</p>";
+      return;
+    }
+
+    data.forEach(item => {
+      container.innerHTML += `
+        <div class="card">
+          <h3>${item.name}</h3>
+          <p>₦${item.price}</p>
+
+          <button onclick="toggleItem('${item.id}', ${item.listed})">
+            ${item.listed ? "Unlist" : "List"}
+          </button>
+        </div>
+      `;
+    });
+
+  } catch (err) {
+    console.log("Dashboard load error:", err);
   }
-
-  const { data, error } = await window.db
-    .from("products")
-    .select("*")
-    .eq("owner", owner)
-    .eq("contact", contact);
-
-  if (error) {
-    console.log(error);
-    return;
-  }
-
-  let container = document.getElementById("userProducts");
-  container.innerHTML = "";
-
-  if (data.length === 0) {
-    container.innerHTML = "<p>No items found</p>";
-    return;
-  }
-
-  data.forEach(item => {
-    container.innerHTML += `
-      <div class="card">
-        <img src="${item.image}">
-        <h3>${item.name}</h3>
-        <p>₦${item.price}</p>
-
-        <button onclick="toggleItem('${item.id}', ${item.listed})">
-          ${item.listed ? "Unlist" : "List"}
-        </button>
-      </div>
-    `;
-  });
 }
 
 
-// =====================
+// ===============================
 // TOGGLE LIST / UNLIST
-// =====================
+// ===============================
 async function toggleItem(id, current) {
-  await window.db
-    .from("products")
-    .update({ listed: !current })
-    .eq("id", id);
+  try {
+    const { error } = await window.db
+      .from("products")
+      .update({ listed: !current })
+      .eq("id", id);
 
-  loadUserItems();
+    if (error) {
+      console.log("Toggle error:", error);
+      return;
+    }
+
+    loadUserItems();
+    loadProducts();
+
+  } catch (err) {
+    console.log("Toggle crash:", err);
+  }
 }
